@@ -1,0 +1,69 @@
+import React, { useEffect } from 'react';
+import { Toaster } from "@/components/ui/toaster";
+import { Toaster as Sonner } from "@/components/ui/sonner";
+import { TooltipProvider } from "@/components/ui/tooltip";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { AuthProvider } from "@/context/AuthContext";
+import { ProtectedRoute } from "@/components/ProtectedRoute";
+import { initializeMockData } from "@/data/mockData";
+
+// Direct imports instead of lazy loading to avoid module resolution issues
+import Login from "./pages/Login";
+import Dashboard from "./pages/Dashboard";
+import Students from "./pages/Students";
+import CustomFields from "./pages/CustomFields";
+import NotFound from "./pages/NotFound";
+
+const queryClient = new QueryClient();
+
+const App = () => {
+  // Initialize mock data on app load
+  useEffect(() => {
+    initializeMockData();
+  }, []);
+
+  return (
+    <QueryClientProvider client={queryClient}>
+      <TooltipProvider>
+        <Toaster />
+        <Sonner />
+        <BrowserRouter>
+          <AuthProvider>
+            <Routes>
+              <Route path="/" element={<Navigate to="/login" replace />} />
+              <Route path="/login" element={<Login />} />
+              <Route
+                path="/dashboard"
+                element={
+                  <ProtectedRoute>
+                    <Dashboard />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/students"
+                element={
+                  <ProtectedRoute>
+                    <Students />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/fields"
+                element={
+                  <ProtectedRoute>
+                    <CustomFields />
+                  </ProtectedRoute>
+                }
+              />
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </AuthProvider>
+        </BrowserRouter>
+      </TooltipProvider>
+    </QueryClientProvider>
+  );
+};
+
+export default App;
